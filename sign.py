@@ -1,10 +1,13 @@
-import tensorflow as tf
+# import tensorflow as tf
 import numpy as np
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten, Conv2D, MaxPooling2D
+import sys
+from keras.models import Sequential
+from keras.layers import Dense, Activation, Dropout, Flatten, Input, Conv2D, MaxPooling2D, BatchNormalization
 from tensorflow.keras.callbacks import TensorBoard
 from matplotlib import pyplot as plt
 from keras.preprocessing.image import ImageDataGenerator
+from keras import optimizers
+from sklearn.model_selection import train_test_split
 
 #https://www.kaggle.com/ardamavi/sign-language-digits-dataset#Sign-language-digits-dataset.zip
 X = np.load('./dataset/X.npy')
@@ -14,15 +17,53 @@ print('X shape : {}  Y shape: {}'.format(X.shape, y.shape))
 # Add 4 axis representing grey scale
 X = X[:,:,:,np.newaxis]
 print('X shape : {}  Y shape: {}'.format(X.shape, y.shape))
+# print(y[0])
 
-# datagen = ImageDataGenerator(
-#     rotation_range=16,
-#     width_shift_range=0.12,
-#     height_shift_range=0.12,
-#     zoom_range=0.12
-#     )
+# Normalization image
+# X /= 255.0
 
-# datagen.fit(X)
+shuffle_index = np.random.permutation(2062)
+X, y = X[shuffle_index], y[shuffle_index]
+# print(y[0])
+
+
+### Split test and train data
+
+train_length = round(len(X)*0.75)
+test_length = round(len(X)*0.25)
+# print(f'train_length: {train_length}; test_length: {test_length}')
+
+X_train = X[:train_length]
+X_test = X[-test_length:]
+
+y_train = y[:train_length]
+y_test = y[-test_length:]
+
+## Inny sposob na dzielenie datasetu
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=8)
+
+print(f'X_train: {len(X_train)}; y_train: {len(y_train)}')
+print(f'X_test: {len(X_test)}; y_test: {len(y_test)}')
+
+# Generate new images
+datagen = ImageDataGenerator(
+    rotation_range=16,
+    width_shift_range=0.12,
+    height_shift_range=0.12,
+    zoom_range=0.12
+)
+
+datagen.fit(X_train)
+# X_train = np.array(X_train).reshape(-1, 64, 64, 1)
+# X_test = np.array(X_test).reshape(-1, 64, 64, 1)
+# X_train = X_train.reshape(X_train.shape[0], 28, 28, 1)
+# X_test = X_test.reshape(X_test.shape[0], 28, 28, 1)
+
+
+
+# model.fit_generator(datagen.flow(x_train, y_train, batch_size=32),
+#                     steps_per_epoch=len(x_train) / 32, epochs=epochs)
+# sys.exit()
 
 # print(X.shape)
 # print(len(X[0].shape)) # image is in grey scale because is less than 3
@@ -44,12 +85,10 @@ print('X shape : {}  Y shape: {}'.format(X.shape, y.shape))
 # plt.imshow(X[0], cmap="gray_r") # cmap="gray_r" or cmap="gray"
 # plt.show()
 
-# Normalization image
-X = X / 255.0
+
 # print(X[0])
 # plt.imshow(X[0], cmap="gray")
 # plt.show()
-
 
 model = Sequential()
 
@@ -72,20 +111,31 @@ model.add(Activation("softmax"))
 model.summary()
 
 model.compile(loss='categorical_crossentropy',
-              optimizer='adam',
-              metrics=['accuracy'])
+             optimizer=optimizers.Adadelta(),
+             metrics=['accuracy'])
 
-model.fit(X, y,
-          epochs=20,
-          validation_split=0.1,
-          batch_size=32)
+model.fit(X_train, y_train,
+          epochs=10,
+          batch_size=32
+          )
 
-score, acc = model.evaluate(X, y, verbose=0)
+val_loss, val_acc = model.evaluate(X_test, y_test, verbose=0)
 print('\n')
-print('Test score:', score)
-print('Test accuracy:', acc)
+print('Val loss:', val_loss)
+print('Val accuracy:', val_acc)
+# Jesli są duże rozbierzności (zbyt blisko/daleko - zbyt duża delta) pomiędzy `loss/acc` z ostatniej generacji a `val_loss/val_acc` z model.evaluate
+# to najprawdopodobniej model jest przetrenowany (overfitting)
+# Gdy dochodzi do przetrenowania to model zamiast znajdować zależności w danych, zapamiętuje wszystkie przykłady
+# Wtedy też warto zmniejszyć ilość epok??
+# Powinniśmy się spodziewać że (in sample accuracy), czyli dane z ostatniej generacji epok będą lekko mniejsze niż te z val_loss, val_acc
+
+# acc/loss - in sample accuracy/loss  - dane na których trenujemy (epoki)
+# val_acc/val_loss - out of sample accuracy/loss - dane na ktorych testujemy (chyba??)
+
+# print('Loss: {:.4f}  Accuaracy: {:.4}%'.format(score,acc))
 
 # score = model.evaluate(x_test, y_test, batch_size=128)
+
 
 
 # TODO: 
