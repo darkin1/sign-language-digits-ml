@@ -149,7 +149,7 @@ model = create_model()
 #         )
 
 model.fit_generator(datagen.flow(X_train, y_train, batch_size=32),
-                    steps_per_epoch=64, 
+                    steps_per_epoch=64,
                     epochs=10,
                     # validation_split=0.25, # nie ma takiej funkcji
                     validation_data=(X_test, y_test), # działa
