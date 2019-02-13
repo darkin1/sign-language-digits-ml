@@ -1,6 +1,7 @@
 # import tensorflow as tf
 import numpy as np
 import sys
+import time
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Dropout, Flatten, Input, Conv2D, MaxPooling2D, BatchNormalization
 from tensorflow.keras.callbacks import TensorBoard
@@ -11,7 +12,6 @@ from keras import optimizers
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 
-
 #@link: https://www.kaggle.com/ardamavi/sign-language-digits-dataset#Sign-language-digits-dataset.zip
 X = np.load('./dataset/X.npy')
 y = np.load('./dataset/Y.npy')
@@ -21,6 +21,7 @@ print('X shape : {}  Y shape: {}'.format(X.shape, y.shape))
 X = X[:,:,:,np.newaxis]
 print('X shape : {}  Y shape: {}'.format(X.shape, y.shape))
 # print(y[0])
+
 
 ### Normalization image
 # X /= 255.0
@@ -94,6 +95,11 @@ datagen.fit(X_train)
 # plt.imshow(X[0], cmap="gray")
 # plt.show()
 
+### Path for model logs
+
+NAME = "sign-2-with-dropout-validation-split-{}".format(int(time.time()))
+tensorboard = TensorBoard(log_dir='logs1/{}'.format(NAME))
+
 ### Create Model
 def create_model():
     model = Sequential()
@@ -101,10 +107,12 @@ def create_model():
     model.add(Conv2D(filters = 64, kernel_size = (3,3), input_shape = (64, 64, 1))) # input_shape = X.shape[1:]
     model.add(Activation("relu")) 
     model.add(MaxPooling2D(pool_size=(2,2)))
+    model.add(Dropout(0.25))
 
     model.add(Conv2D(64, (3,3)))
     model.add(Activation("relu")) 
     model.add(MaxPooling2D(pool_size=(2,2)))
+    model.add(Dropout(0.25))
 
     model.add(Flatten())
 
@@ -122,16 +130,18 @@ def create_model():
                 metrics=['accuracy'])
     return model
 
-# model = create_model()
-# model.fit(X_train, y_train,
-#           epochs=10,
-#           batch_size=32
-#           )
+model = create_model()
+model.fit(X_train, y_train,
+          epochs=10,
+          validation_split=0.3, # w tensorboard generuje nam epoch_val_acc i epoch_val_loss więc chyba nie potrzeba model.evaluation tak samo jak rozdzielać modelu na dane treningowe i testowe
+          batch_size=32,
+          callbacks=[tensorboard]
+        )
 
-# val_loss, val_acc = model.evaluate(X_test, y_test, verbose=0)
-# print('\n')
-# print('Val loss:', val_loss) # 0.4287418237952299
-# print('Val accuracy:', val_acc) # 0.877906976744186
+val_loss, val_acc = model.evaluate(X_test, y_test, verbose=0)
+print('\n')
+print('Val loss:', val_loss) # 0.4287418237952299
+print('Val accuracy:', val_acc) # 0.877906976744186
 
 # przy 30 epok definitywnie jest overfitting
 # Val loss: 0.8205086271487927
@@ -139,31 +149,44 @@ def create_model():
 
 # print('Loss: {:.4f}  Accuaracy: {:.4}%'.format(score,acc))
 
-# AKTUALNE
+# JAK ROZPOZNAĆ CZY MODEL JEST PRZETRENOWANY
+
 # Jeśli w ostatniej epoce widać że loss jest bardzo nisko a accuracy jest bardzo wysoko to oznacza że nasz model 
-# jest bardzo dobry, albo wyczuł się "na pamięć" datasetu (in-sample data). Aby sprawdzić w rzeczywistości jak dobry jest 
+# jest bardzo dobry, albo wyuczył się "na pamięć" datasetu (in-sample data). Aby sprawdzić w rzeczywistości jak dobry jest 
 # model używamy do tego funkcji model.evaluate, na danych spoza datasetu na którym trenowaliśmy, czyli na danych testowych
 # Można też użyć metody K-Fold cross validation - cross_val_score
+
+### LUB
+
+# As you can see we slightly overfit our trainning data. That is, we got a higher accuracy on our trainning than test data, this is normal. Now let us further train the model on transformed images.
+# Ostatnia epoka: loss: 0.0823 - acc: 0.9788 (acc 0.9788 jest większe na danych treningowych niż na danych testowych 0.9588)
+# model.evaluate: Loss: 0.1481  Accuaracy: 0.9588%
+# Model jest trochę przetrenowany ponieważ Accuracy na danych treningowych jest lekko większy niż Accuracy na danych testowych
+
 
 # acc/loss - in sample accuracy/loss  - dane na których trenujemy (epoki)
 # val_acc/val_loss - out of sample accuracy/loss - dane na ktorych testujemy
 
 ### Dokładniejszy sposób sprawdzania czy model jest przetrenowany
 
-estimator = KerasClassifier(build_fn=create_model, epochs=10, verbose=0)
-scores = cross_val_score(estimator, X, y, cv=10) # using all dataset (not only test data)
-print(scores) # [0.87922705 0.90338164 0.88834951 0.90776699 0.87864078 0.86407767 0.83009709 0.83980583 0.89320388 0.83009709]
-print(scores.mean()) # 0.871464752741946
+# estimator = KerasClassifier(build_fn=create_model, epochs=10, verbose=0)
+# scores = cross_val_score(estimator, X, y, cv=10) # using all dataset (not only test data)
+# print(scores) # [0.87922705 0.90338164 0.88834951 0.90776699 0.87864078 0.86407767 0.83009709 0.83980583 0.89320388 0.83009709]
+# print(scores.mean()) # 0.871464752741946
 
 
 
 # TODO: 
-# - generate new images from dataset
-#  - ranomize data
+# - [Done] generate new images from dataset
+#  - [Done] ranomize data
 #     - merge X and Y
 #     - split to tests?
 # - add tensorboard
 # - auto generate new models
 # - save the best model
 # - predict photos
-# - validate?
+# - [Done?] validate?
+# - [Done] sprawdzić dlaczego nie działa normalizacja / oraz użyć funkcji do normalizacji
+# - ddodać droput - https://www.tensorflow.org/tutorials/keras/overfit_and_underfit
+# - uworzyć jeszcze więcej danych
+# - utworzenie grafu https://www.tensorflow.org/tutorials/keras/basic_text_classification
