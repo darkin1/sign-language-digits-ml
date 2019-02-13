@@ -55,10 +55,20 @@ datagen = ImageDataGenerator(
     rotation_range=16,
     width_shift_range=0.12,
     height_shift_range=0.12,
-    zoom_range=0.12
+    zoom_range=0.12,
+    validation_split=0.25
 )
-
 datagen.fit(X_train)
+
+# dataval = ImageDataGenerator(
+#     rotation_range=16,
+#     width_shift_range=0.12,
+#     height_shift_range=0.12,
+#     zoom_range=0.12
+# )
+# dataval.fit(X_test)
+
+
 # X_train = np.array(X_train).reshape(-1, 64, 64, 1)
 # X_test = np.array(X_test).reshape(-1, 64, 64, 1)
 # X_train = X_train.reshape(X_train.shape[0], 28, 28, 1)
@@ -97,7 +107,7 @@ datagen.fit(X_train)
 
 ### Path for model logs
 
-NAME = "sign-2-with-dropout-validation-split-{}".format(int(time.time()))
+NAME = "sign-4-fit-generate-{}".format(int(time.time()))
 tensorboard = TensorBoard(log_dir='logs1/{}'.format(NAME))
 
 ### Create Model
@@ -131,12 +141,21 @@ def create_model():
     return model
 
 model = create_model()
-model.fit(X_train, y_train,
-          epochs=10,
-          validation_split=0.3, # w tensorboard generuje nam epoch_val_acc i epoch_val_loss więc chyba nie potrzeba model.evaluation tak samo jak rozdzielać modelu na dane treningowe i testowe
-          batch_size=32,
-          callbacks=[tensorboard]
-        )
+# model.fit(X_train, y_train,
+#           epochs=10,
+#           validation_split=0.25, # w tensorboard generuje nam epoch_val_acc i epoch_val_loss więc chyba nie potrzeba model.evaluation tak samo jak rozdzielać modelu na dane treningowe i testowe
+#           batch_size=32,
+#           callbacks=[tensorboard]
+#         )
+
+model.fit_generator(datagen.flow(X_train, y_train, batch_size=32),
+                    steps_per_epoch=64, 
+                    epochs=10,
+                    # validation_split=0.25, # nie ma takiej funkcji
+                    validation_data=(X_test, y_test), # działa
+                    # validation_data=(dataval.flow(X_train, y_train)), # nie działa
+                    callbacks=[tensorboard]
+                )
 
 val_loss, val_acc = model.evaluate(X_test, y_test, verbose=0)
 print('\n')
@@ -181,12 +200,12 @@ print('Val accuracy:', val_acc) # 0.877906976744186
 #  - [Done] ranomize data
 #     - merge X and Y
 #     - split to tests?
-# - add tensorboard
+# - [Done] add tensorboard
 # - auto generate new models
 # - save the best model
 # - predict photos
 # - [Done?] validate?
 # - [Done] sprawdzić dlaczego nie działa normalizacja / oraz użyć funkcji do normalizacji
-# - ddodać droput - https://www.tensorflow.org/tutorials/keras/overfit_and_underfit
-# - uworzyć jeszcze więcej danych
+# - [Done] dodać droput - https://www.tensorflow.org/tutorials/keras/overfit_and_underfit
+# - [Done] uworzyć jeszcze więcej danych
 # - utworzenie grafu https://www.tensorflow.org/tutorials/keras/basic_text_classification
