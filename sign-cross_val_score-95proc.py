@@ -116,5 +116,5 @@ model = create_model()
 
 estimator = KerasClassifier(build_fn=create_model, epochs=40, verbose=0)
 scores = cross_val_score(estimator, X, y, cv=10) # using all dataset (not only test data)
-print(scores) # [0.87922705 0.90338164 0.88834951 0.90776699 0.87864078 0.86407767 0.83009709 0.83980583 0.89320388 0.83009709]
-print(scores.mean()) # 0.871464752741946
+print(scores) # [0.95652174 0.92753623 0.96601942 0.95145631 0.95145631 0.97087379 0.95631068 0.95145631 0.95631068 0.9368932 ]
+print(scores.mean()) # 0.952483466425676
