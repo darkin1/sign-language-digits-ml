@@ -11,6 +11,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras import optimizers
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
+from numpy import array
 
 ### Load dataset
 #@link: https://www.kaggle.com/ardamavi/sign-language-digits-dataset#Sign-language-digits-dataset.zip
@@ -94,27 +95,28 @@ def create_model():
 model = create_model()
 
 ### Train and validate model
-# model.fit_generator(datagen.flow(X_train, y_train, batch_size=32),
-#                     steps_per_epoch=128,
-#                     epochs=40,
-#                     validation_data=(X_test, y_test),
-#                     callbacks=[tensorboard]
-#                 )
+model.fit_generator(datagen.flow(X_train, y_train, batch_size=32),
+                    steps_per_epoch=128,
+                    epochs=1,
+                    validation_data=(X_test, y_test),
+                    callbacks=[tensorboard]
+                )
 
 ### Simpler validation
 # val_loss, val_acc = model.evaluate(X_test, y_test, verbose=0)
 # print(f"Val Loss: {val_loss}; Val Accuracy: {val_acc}" )
 
 
+### Predict answer
+pX = X[1][np.newaxis,:,:,:] # that same as: array([X[1]])
 
-# model.fit_generator(datagen.flow(X_train, y_train, batch_size=32),
-#                     steps_per_epoch=128,
-#                     epochs=40,
-#                     validation_data=(X_test, y_test),
-#                     # callbacks=[tensorboard]
-#                 )
+predicted = model.predict(pX)
+print(predicted)
 
-estimator = KerasClassifier(build_fn=create_model, epochs=40, verbose=0)
-scores = cross_val_score(estimator, X, y, cv=10) # using all dataset (not only test data)
-print(scores) # [0.87922705 0.90338164 0.88834951 0.90776699 0.87864078 0.86407767 0.83009709 0.83980583 0.89320388 0.83009709]
-print(scores.mean()) # 0.871464752741946
+# predicted_proba = model.predict_proba(pX)
+# print(predicted_proba)
+
+predicted_class_number = model.predict_classes(pX)
+print(predicted_class_number)
+
+print("Classes probability=%s, The best predicted class=%s" % (predicted, predicted_class_number))
