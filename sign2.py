@@ -71,3 +71,18 @@ model.fit(Xtrain, ytrain, batch_size=32, epochs=10)
 score = model.evaluate(Xtest, ytest, verbose=0)
 
 print('Loss: {:.4f}  Accuaracy: {:.4}%'.format(score[0],score[1]))
+
+test_image = Xtest[4]
+test_image_array = test_image.reshape(64, 64)
+test_image = np.expand_dims(test_image, axis = 0)
+result = model.predict(test_image)
+
+predicted_class_number = model.predict_classes(test_image)
+
+
+print('Predict: ', np.round(result, 1))
+print('Label: ', ytest[4])
+print('Predicted number: ', predicted_class_number)
+
+plt.imshow(test_image_array, cmap='gray')
+plt.show()

@@ -27,7 +27,12 @@ print('X shape : {}  Y shape: {}'.format(X.shape, y.shape))
 shuffle_index = np.random.permutation(2062)
 X, y = X[shuffle_index], y[shuffle_index]
 
-
+### Check labels
+label = 2
+print("Number: %s" % y[label])
+plt.imshow(np.squeeze(X[label]), cmap='gray')
+plt.show()
+sys.exit()
 
 ### Split test and train data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=8)
@@ -103,8 +108,8 @@ model.fit_generator(datagen.flow(X_train, y_train, batch_size=32),
                 )
 
 ### Simpler validation
-# val_loss, val_acc = model.evaluate(X_test, y_test, verbose=0)
-# print(f"Val Loss: {val_loss}; Val Accuracy: {val_acc}" )
+val_loss, val_acc = model.evaluate(X_test, y_test, verbose=0)
+print(f"Val Loss: {val_loss}; Val Accuracy: {val_acc}" )
 
 
 ### Predict answer
@@ -119,9 +124,12 @@ print(predicted)
 predicted_class_number = model.predict_classes(pX)
 print(predicted_class_number)
 
-print("Classes probability=%s, The best predicted class=%s" % (predicted, predicted_class_number+1))
+print("Classes probability=%s, The best predicted number=%s, Y=%s" % (predicted, predicted_class_number, y[1]))
+
+print(np.round(predicted_class_number, 1))
+
 
 # Show predicted image
 plt.imshow(np.squeeze(X[1]), cmap="gray")
 plt.show()
-sys.exit()
+# sys.exit()
