@@ -97,7 +97,7 @@ model = create_model()
 ### Train and validate model
 model.fit_generator(datagen.flow(X_train, y_train, batch_size=32),
                     steps_per_epoch=128,
-                    epochs=1,
+                    epochs=5,
                     validation_data=(X_test, y_test),
                     callbacks=[tensorboard]
                 )
@@ -119,4 +119,9 @@ print(predicted)
 predicted_class_number = model.predict_classes(pX)
 print(predicted_class_number)
 
-print("Classes probability=%s, The best predicted class=%s" % (predicted, predicted_class_number))
+print("Classes probability=%s, The best predicted class=%s" % (predicted, predicted_class_number+1))
+
+# Show predicted image
+plt.imshow(np.squeeze(X[1]), cmap="gray")
+plt.show()
+sys.exit()
