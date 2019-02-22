@@ -9,26 +9,6 @@ IMG_SIZE = 64
 DATADIR = "./dataset_raw"
 CATEGORIES = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
-# for category in CATEGORIES:    
-#     path = os.path.join(DATADIR, category) #path to cats or dogs dir ex. ./../datasets/kagglecatsanddogs/PetImages/Dog
-#     for img in os.listdir(path): # ex. img == 7949.jpg
-        
-#         # konwerujemy zdjęcia na szare
-#         # poniewaz zajmuje mniej miejsca
-#         # poniewaz kolor nie definiuje czy jest to kot czy pies
-#         img_array = cv2.imread(os.path.join(path, img), cv2.IMREAD_GRAYSCALE)
-#         img_array = cv2.resize(img_array, (IMG_SIZE, IMG_SIZE))
-                
-#         # plt.imshow(img_array, cmap="gray")
-#         # plt.show()
-#         # break
-#     # break
-#     print(len(os.listdir(path)))
-
-# print(img_array)
-# print("\n Kształt tablicy ze zdjęciami: \n")
-# print(img_array.shape)
-
 X = []
 y = []
 def create_training_data():
