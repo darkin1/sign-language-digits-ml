@@ -15,8 +15,8 @@ from numpy import array
 
 ### Load dataset
 #@link: https://www.kaggle.com/ardamavi/sign-language-digits-dataset#Sign-language-digits-dataset.zip
-X = np.load('./dataset/X.npy')
-y = np.load('./dataset/Y.npy')
+X = np.load('./dataset_fixed/X.npy')
+y = np.load('./dataset_fixed/Y.npy')
 print('X shape : {}  Y shape: {}'.format(X.shape, y.shape))
 
 ### Add 4 axis representing grey scale
@@ -28,11 +28,11 @@ shuffle_index = np.random.permutation(2062)
 X, y = X[shuffle_index], y[shuffle_index]
 
 ### Check labels
-label = 2
-print("Number: %s" % y[label])
-plt.imshow(np.squeeze(X[label]), cmap='gray')
-plt.show()
-sys.exit()
+# label = 2
+# print("Number: %s" % y[label])
+# plt.imshow(np.squeeze(X[label]), cmap='gray')
+# plt.show()
+# sys.exit()
 
 ### Split test and train data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=8)
@@ -113,7 +113,8 @@ print(f"Val Loss: {val_loss}; Val Accuracy: {val_acc}" )
 
 
 ### Predict answer
-pX = X[1][np.newaxis,:,:,:] # that same as: array([X[1]])
+key = 1
+pX = X[key][np.newaxis,:,:,:] # that same as: array([X[1]])
 
 predicted = model.predict(pX)
 print(predicted)
@@ -124,12 +125,12 @@ print(predicted)
 predicted_class_number = model.predict_classes(pX)
 print(predicted_class_number)
 
-print("Classes probability=%s, The best predicted number=%s, Y=%s" % (predicted, predicted_class_number, y[1]))
+print("Classes probability=%s, The best predicted number=%s, Y=%s" % (predicted, predicted_class_number, y[key]))
 
 print(np.round(predicted_class_number, 1))
 
 
 # Show predicted image
-plt.imshow(np.squeeze(X[1]), cmap="gray")
+plt.imshow(np.squeeze(X[key]), cmap="gray")
 plt.show()
 # sys.exit()
