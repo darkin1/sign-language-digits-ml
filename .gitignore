@@ -1,5 +1,6 @@
 dataset/
 dataset_raw/
 dataset_fixed/
+models/
 logs1/
 .vscode
