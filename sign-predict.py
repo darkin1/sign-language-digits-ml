@@ -8,8 +8,14 @@ model = tf.keras.models.load_model('./models/sign-10-40-epochs-1550868468')
 
 
 IMG_SIZE = 64
-DATADIR = "./dataset_raw/4/"
-FILENAME = "IMG_4133.JPG"
+DATADIR = "./dataset_raw/2"
+# DATADIR = "./predict_images/prawa_reka"
+# DATADIR = "./predict_images/lewa_reka"
+# DATADIR = "./predict_images/bledne"
+# DATADIR = "./predict_images/prawa_reka_jasne"
+# DATADIR = "./predict_images/lewa_reka_jasne"
+# DATADIR = "./predict_images/lewa_reka_jasne_mirror"
+FILENAME = "IMG_4225.JPG"
 
 def load_image():
     X = []
@@ -35,6 +41,10 @@ def predict(model, X):
 
     print("Classes probability=%s" % (predicted))
     print(" === THE BEST PREDICTED NUMBER: %s === " % (predicted_class_number))
+
+# TODO: 
+# wybrać 3 najlepsze klasy i przeliczać na procenty
+# wyuczyć model na większej ilości epok
 
 
 
